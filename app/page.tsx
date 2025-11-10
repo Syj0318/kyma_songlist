@@ -69,9 +69,9 @@ export default function SongListPage() {
           <h1 className="text-5xl md:text-6xl font-extrabold tracking-wide text-black">
             <span className="text-pink-500">키마</span> 노래책
           </h1>
-          <p className="text-sm md:text-base text-gray-600 mt-2">
+          {/* <p className="text-sm md:text-base text-gray-600 mt-2">
             검색과 필터가 가능한 심플한 노래 리스트
-          </p>
+          </p> */}
         </header>
 
         <section className="bg-white p-4 rounded-2xl shadow-sm mb-4 flex flex-col md:flex-row justify-between items-center">
