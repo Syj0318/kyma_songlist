@@ -9,7 +9,6 @@ const typeColors: Record<string, string> = {
   '발라드': 'bg-gray-200 text-gray-800',
   '뮤지컬': 'bg-teal-200 text-teal-800',
   'JPOP': 'bg-orange-200 text-orange-800',
-  '경연곡': 'bg-yellow-200 text-yellow-800',
   'OST': 'bg-indigo-200 text-indigo-800',
 };
 
@@ -160,7 +159,7 @@ export default function SongListPage() {
               </div>
             </section>
             <p className="text-sm md:text-base text-gray-600 mt-6">
-              노래책 내 곡 완곡 300개 입니다. 
+              노래책 내 곡 완곡 300개입니다. 
             </p>
             <p  className="text-sm md:text-base text-gray-600">
               제목 뒤 ※ 표기가 붙은 곡은 허위매물입니다.
@@ -176,15 +175,15 @@ export default function SongListPage() {
                 총 <span className="font-semibold">{songs.length}</span>곡 중{" "}
                 <span className="font-semibold">{filtered.length}</span>곡
               </div>
-              <div className="flex gap-3 w-full md:w-auto">
+              <div className="flex flex-wrap gap-3 w-full md:w-auto">
                 <input
-                  className="flex-[7] h-12 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-300"
+                  className="flex-[6] h-12 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-300"
                   placeholder="제목 또는 가수 검색"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                 />
                 <select
-                  className="flex-[3] h-12 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-300"
+                  className="flex-[4] h-12 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-300"
                   value={sort}
                   onChange={(e) => setSort(e.target.value)}
                 >
