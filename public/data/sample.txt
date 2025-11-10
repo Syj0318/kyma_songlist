@@ -1,0 +1,255 @@
+//// 컬럼
+// "use client";
+// import { useMemo, useState, useEffect } from 'react';
+
+// const typeColors: Record<string, string> = { 
+//   'POP': 'bg-sky-200 text-sky-800',
+//   'R&B': 'bg-purple-200 text-purple-800',
+//   'KPOP': 'bg-pink-200 text-pink-800',
+//   '발라드': 'bg-gray-200 text-gray-800',
+//   '뮤지컬': 'bg-teal-200 text-teal-800',
+//   'JPOP': 'bg-orange-200 text-orange-800',
+//   '경연곡': 'bg-yellow-200 text-yellow-800',
+//   'OST': 'bg-indigo-200 text-indigo-800',
+// };
+
+// const tagColors: Record<string, string> = {
+//   '숙제곡': 'bg-green-200 text-green-800',
+//   '경연곡': 'bg-yellow-300 text-yellow-800',
+// };
+
+// interface Song {
+//   id: string;
+//   title: string;
+//   artist: string;
+//   type: string[];
+//   tag: string[];
+// }
+
+// export default function SongListPage() {
+//   const [songs, setSongs] = useState<Song[]>([]);
+//   const [query, setQuery] = useState('');
+//   const [sort, setSort] = useState('title');
+//   const [selectedType, setSelectedType] = useState<string | null>(null);
+//   const [selectedArtist, setSelectedArtist] = useState<string | null>(null);
+//   const [selectedTag, setSelectedTag] = useState<string | null>(null);
+
+//   useEffect(() => {
+//     fetch('/data/song.json')
+//       .then(res => res.json())
+//       .then((data: Song[]) => setSongs(data))
+//       .catch(err => {
+//         console.error("Failed to load songs.json:", err);
+//         setSongs([]);
+//       });
+//   }, []);
+
+//   // 가수별 곡 수 계산 (3곡 이상인 가수만 필터링)
+//   const artistCount = useMemo(() => {
+//     return songs.reduce((acc: Record<string, number>, song) => {
+//       acc[song.artist] = (acc[song.artist] || 0) + 1;
+//       return acc;
+//     }, {});
+//   }, [songs]);
+
+//   const filteredArtists = useMemo(() => {
+//     return Object.entries(artistCount)
+//       .filter(([_, count]) => count >= 3) // 3곡 이상 있는 가수만 필터링
+//       .map(([artist]) => artist);
+//   }, [artistCount]);
+
+//   // 타입별 곡 수 계산
+//   const typeCount = useMemo(() => {
+//     return songs.reduce((acc: Record<string, number>, song) => {
+//       song.type.forEach(t => {
+//         acc[t] = (acc[t] || 0) + 1;
+//       });
+//       return acc;
+//     }, {});
+//   }, [songs]);
+
+//   // 태그별 곡 수 계산
+//   const tagCount = useMemo(() => {
+//     return songs.reduce((acc: Record<string, number>, song) => {
+//       song.tag.forEach(t => {
+//         acc[t] = (acc[t] || 0) + 1;
+//       });
+//       return acc;
+//     }, {});
+//   }, [songs]);
+
+//   // 필터링된 곡
+//   const filtered = useMemo(() => {
+//     const q = query.trim().toLowerCase();
+//     return songs
+//       .filter(song => {
+//         const matchesQuery =
+//           song.title.toLowerCase().includes(q) ||
+//           song.artist.toLowerCase().includes(q);
+//         const matchesType = selectedType ? song.type.includes(selectedType) : true;
+//         const matchesArtist = selectedArtist ? song.artist === selectedArtist : true;
+//         const matchesTag = selectedTag ? song.tag.includes(selectedTag) : true;
+//         return matchesQuery && matchesType && matchesArtist && matchesTag;
+//       })
+//       .sort((a, b) => {
+//         if (sort === 'title') return a.title.localeCompare(b.title);
+//         if (sort === 'artist') return a.artist.localeCompare(b.artist);
+//         return 0;
+//       });
+//   }, [query, sort, songs, selectedType, selectedArtist, selectedTag]);
+
+//   // 모든 가수, 장르, 태그 목록 가져오기
+//   const allArtists = useMemo(() => {
+//     const artistsSet = new Set<string>();
+//     songs.forEach(song => artistsSet.add(song.artist));
+//     return Array.from(artistsSet).sort();
+//   }, [songs]);
+
+//   const allTypes = useMemo(() => {
+//     const typesSet = new Set<string>();
+//     songs.forEach(song => song.type.forEach(t => typesSet.add(t)));
+//     return Array.from(typesSet).sort();
+//   }, [songs]);
+
+//   const allTags = useMemo(() => {
+//     const tagsSet = new Set<string>();
+//     songs.forEach(song => song.tag.forEach(t => tagsSet.add(t)));
+//     return Array.from(tagsSet).sort();
+//   }, [songs]);
+
+//   return (
+//     <main className="min-h-screen bg-slate-50 p-6 md:p-12">
+//       <div className="max-w-4xl mx-auto">
+
+//         {/* Header */}
+//         <header className="mb-6 text-center">
+//           <h1 className="text-5xl md:text-6xl font-extrabold tracking-wide text-black">
+//             <span className="text-pink-500">키마</span> 노래책
+//           </h1>
+//           <p className="text-sm md:text-base text-gray-600 mt-2">
+//             검색과 필터가 가능한 심플한 노래 리스트
+//           </p>
+//         </header>
+
+//         {/* 검색 및 필터 섹션 */}
+//         <section className="bg-white p-4 rounded-2xl shadow-sm mb-4 flex flex-col md:flex-row justify-between items-center">
+//           <div className="text-sm text-slate-600 mb-4 md:mb-0">
+//             총 <span className="font-semibold">{songs.length}</span>곡 중 <span className="font-semibold">{filtered.length}</span>곡
+//           </div>
+//           <div className="flex gap-3 w-full md:w-auto">
+//             <input
+//               className="flex-grow-[7] h-12 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-300"
+//               placeholder="제목 또는 가수명 검색"
+//               value={query}
+//               onChange={(e) => setQuery(e.target.value)}
+//             />
+//             <select
+//               className="flex-grow-[3] h-12 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-300"
+//               value={sort}
+//               onChange={(e) => setSort(e.target.value)}
+//             >
+//               <option value="title">제목순</option>
+//               <option value="artist">가수순</option>
+//             </select>
+//           </div>
+//         </section>
+
+//         {/* 필터: 가수, 장르, 태그 선택 */}
+//         <section className="mb-6">
+//           <div className="flex gap-4 flex-wrap">
+//             {/* 가수 필터 */}
+//             <div className="flex flex-col gap-1">
+//               <label htmlFor="artist-filter" className="font-medium text-sm">가수</label>
+//               <select
+//                 id="artist-filter"
+//                 value={selectedArtist || ''}
+//                 onChange={(e) => setSelectedArtist(e.target.value)}
+//                 className="h-12 border rounded-lg px-3 py-2"
+//               >
+//                 <option value="">전체</option>
+//                 {filteredArtists.map((artist) => (
+//                   <option key={artist} value={artist}>
+//                     {artist} ({artistCount[artist]})
+//                   </option>
+//                 ))}
+//               </select>
+//             </div>
+
+//             {/* 장르 필터 */}
+//             <div className="flex flex-col gap-1">
+//               <label htmlFor="type-filter" className="font-medium text-sm">장르</label>
+//               <select
+//                 id="type-filter"
+//                 value={selectedType || ''}
+//                 onChange={(e) => setSelectedType(e.target.value)}
+//                 className="h-12 border rounded-lg px-3 py-2"
+//               >
+//                 <option value="">전체</option>
+//                 {allTypes.map((type) => (
+//                   <option key={type} value={type}>
+//                     {type} ({typeCount[type]})
+//                   </option>
+//                 ))}
+//               </select>
+//             </div>
+
+//             {/* 태그 필터 */}
+//             <div className="flex flex-col gap-1">
+//               <label htmlFor="tag-filter" className="font-medium text-sm">태그</label>
+//               <select
+//                 id="tag-filter"
+//                 value={selectedTag || ''}
+//                 onChange={(e) => setSelectedTag(e.target.value)}
+//                 className="h-12 border rounded-lg px-3 py-2"
+//               >
+//                 <option value="">전체</option>
+//                 {allTags.map((tag) => (
+//                   <option key={tag} value={tag}>
+//                     {tag} ({tagCount[tag]})
+//                   </option>
+//                 ))}
+//               </select>
+//             </div>
+//           </div>
+//         </section>
+
+//         {/* 노래 리스트 */}
+//         <section>
+//           <ul className="grid gap-3 max-h-[550px] overflow-y-auto">
+//             {filtered.length === 0 && (
+//               <li className="text-center text-slate-500 py-8">검색 결과가 없습니다.</li>
+//             )}
+//             {filtered.map((song) => (
+//               <li key={song.id} className="bg-white p-4 rounded-xl shadow-sm flex justify-between items-center">
+//                 <div>
+//                   <div className="font-semibold text-lg text-black">{song.title}</div>
+//                   <div className="text-sm text-slate-600">{song.artist}</div>
+//                   <div className="flex flex-wrap gap-2 mt-2">
+//                     {song.type.map((t, i) => (
+//                       <span
+//                         key={i}
+//                         className={`text-xs px-2 py-1 rounded-full border ${typeColors[t] || 'bg-slate-100 text-slate-700'}`}
+//                       >
+//                         {t}
+//                       </span>
+//                     ))}
+//                   </div>
+//                 </div>
+//                 <div className="flex flex-wrap gap-2 mt-2 md:mt-0">
+//                   {song.tag.map((t, i) => (
+//                     <span
+//                       key={i}
+//                       className={`text-xs px-2 py-1 rounded-full border ${tagColors[t] || 'bg-slate-100 text-slate-700'}`}
+//                     >
+//                       {t}
+//                     </span>
+//                   ))}
+//                 </div>
+//               </li>
+//             ))}
+//           </ul>
+//         </section>
+//       </div>
+//     </main>
+//   );
+// }
