@@ -2,7 +2,23 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #000;
+}
+
+.main-bg {
+  background-color: #ededed;
+}
+
+.main-select {
+  background-color: #919191;
+}
+
+.body-line {
+  background-color: #000;
+}
+
+.body-text {
+  color: #413133;
 }
 
 @theme inline {

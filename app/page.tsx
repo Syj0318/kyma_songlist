@@ -2,24 +2,35 @@
 import { useMemo, useState, useEffect, useRef } from "react";
 
 const typeColors: Record<string, { bg: string; text: string; selectedBg: string; selectedText: string }> = {
-  'POP': { bg: 'bg-sky-100', text: 'text-sky-800', selectedBg: 'bg-sky-800', selectedText: 'text-sky-200' },
-  'R&B': { bg: 'bg-purple-100', text: 'text-purple-800', selectedBg: 'bg-purple-800', selectedText: 'text-purple-200' },
-  'KPOP': { bg: 'bg-pink-100', text: 'text-pink-800', selectedBg: 'bg-pink-800', selectedText: 'text-pink-200' },
   '발라드': { bg: 'bg-gray-100', text: 'text-gray-800', selectedBg: 'bg-gray-800', selectedText: 'text-gray-200' },
-  '뮤지컬': { bg: 'bg-teal-100', text: 'text-teal-800', selectedBg: 'bg-teal-800', selectedText: 'text-teal-200' },
+  'R&B': { bg: 'bg-purple-100', text: 'text-purple-800', selectedBg: 'bg-purple-800', selectedText: 'text-purple-200' },
+  'POP': { bg: 'bg-sky-100', text: 'text-sky-800', selectedBg: 'bg-sky-800', selectedText: 'text-sky-200' },
   'JPOP': { bg: 'bg-orange-100', text: 'text-orange-800', selectedBg: 'bg-orange-800', selectedText: 'text-orange-200' },
-  'OST': { bg: 'bg-indigo-100', text: 'text-indigo-800', selectedBg: 'bg-indigo-800', selectedText: 'text-indigo-200' }
+  'OST': { bg: 'bg-indigo-100', text: 'text-indigo-800', selectedBg: 'bg-indigo-800', selectedText: 'text-indigo-200' },
+  '댄스': { bg: 'bg-pink-100', text: 'text-pink-800', selectedBg: 'bg-pink-800', selectedText: 'text-pink-200' },
+  '아이돌': { bg: 'bg-rose-100', text: 'text-rose-800', selectedBg: 'bg-rose-800', selectedText: 'text-rose-200' },
+  '인디/포크': { bg: 'bg-emerald-100', text: 'text-emerald-800', selectedBg: 'bg-emerald-800', selectedText: 'text-emerald-200' },
+  '락': { bg: 'bg-red-100', text: 'text-red-800', selectedBg: 'bg-red-800', selectedText: 'text-red-200' },
+  '뮤지컬': { bg: 'bg-teal-100', text: 'text-teal-800', selectedBg: 'bg-teal-800', selectedText: 'text-teal-200' }
 };
 
 const tagColors: Record<string, { bg: string; text: string; selectedBg: string; selectedText: string }> = {
-  숙제곡: { bg: 'bg-blue-100', text: 'text-blue-800', selectedBg: 'bg-blue-800', selectedText: 'text-blue-200' },
-  경연곡: { bg: 'bg-yellow-100', text: 'text-yellow-800', selectedBg: 'bg-yellow-800', selectedText: 'text-yellow-200' },
+  '경연곡': { bg: 'bg-cyan-100', text: 'text-cyan-800', selectedBg: 'bg-cyan-800', selectedText: 'text-cyan-200' },
+  '숙제곡': { bg: 'bg-lime-100', text: 'text-lime-800', selectedBg: 'bg-lime-800', selectedText: 'text-lime-200' },
 };
+
+// interface Song {
+//   id: string;
+//   title: string;
+//   artist: string;
+//   type: string[];
+//   tag: string[];
+// }
 
 interface Song {
   id: string;
   title: string;
-  artist: string;
+  artist: string[];
   type: string[];
   tag: string[];
 }
@@ -33,7 +44,7 @@ export default function SongListPage() {
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
   // visible count (사용자가 왼쪽에 미리 보이는 가수 개수 지정)
-  const [visibleArtistCount, setVisibleArtistCount] = useState<number>(15);
+  const [visibleArtistCount, setVisibleArtistCount] = useState<number>(16);
 
   // modal
   const [showArtistModal, setShowArtistModal] = useState(false);
@@ -64,8 +75,13 @@ export default function SongListPage() {
   // 가수 집계: 기본은 곡 많은 순, 하지만 selectedArtist가 있고 그 가수가 현재 보이는 범위(visibleArtistCount) 밖이면 맨 위로 올림
   const allArtists = useMemo(() => {
     const artistCount: Record<string, number> = {};
+    // songs.forEach((s) => {
+    //   artistCount[s.artist] = (artistCount[s.artist] || 0) + 1;
+    // });
     songs.forEach((s) => {
-      artistCount[s.artist] = (artistCount[s.artist] || 0) + 1;
+      s.artist.forEach((a) => {
+        artistCount[a] = (artistCount[a] || 0) + 1;
+      });
     });
 
     let sorted = Object.entries(artistCount)
@@ -89,15 +105,17 @@ export default function SongListPage() {
     const q = query.trim().toLowerCase();
     return songs
       .filter((song) => {
-        const matchesQuery = song.title.toLowerCase().includes(q) || song.artist.toLowerCase().includes(q);
+        const matchesQuery =
+        song.title.toLowerCase().includes(q) ||
+        song.artist.some((a) => a.toLowerCase().includes(q));
         const matchesType = selectedType ? song.type.includes(selectedType) : true;
-        const matchesArtist = selectedArtist ? song.artist === selectedArtist : true;
+        const matchesArtist = selectedArtist ? song.artist.includes(selectedArtist) : true;
         const matchesTag = selectedTag ? song.tag.includes(selectedTag) : true;
         return matchesQuery && matchesType && matchesArtist && matchesTag;
       })
       .sort((a, b) => {
         if (sort === "title") return a.title.localeCompare(b.title);
-        if (sort === "artist") return a.artist.localeCompare(b.artist);
+        if (sort === "artist") return a.artist.join(", ").localeCompare(b.artist.join(", "));
         return 0;
       });
   }, [songs, query, selectedType, selectedArtist, selectedTag, sort]);
@@ -106,7 +124,7 @@ export default function SongListPage() {
   const visibleArtists = allArtists.slice(0, Math.max(1, Math.min(50, visibleArtistCount))); // 안전범위 1~50
 
   return (
-    <main className="min-h-screen bg-slate-50 p-6 md:p-10">
+    <main className="min-h-screen main-bg p-6 md:p-10">
       <div className="max-w-7xl mx-auto">
         <header className="mb-6 text-center">
           <h1 className="text-5xl md:text-6xl font-extrabold tracking-wide text-black flex items-center justify-center">
@@ -114,7 +132,7 @@ export default function SongListPage() {
               className="relative w-full max-w-[800px] min-w-[400px] h-[220px]"
             >
               <img 
-                src="/kyma111.png" 
+                src="/1111.png" 
                 alt="음악 아이콘" 
                 className="absolute inset-0 w-full h-full object-contain"
               />
@@ -124,20 +142,43 @@ export default function SongListPage() {
 
         <div className="flex flex-col md:flex-row gap-6">
           {/* LEFT: filters */}
-          <aside className="md:w-1/3 bg-white rounded-2xl shadow-sm p-4 h-fit">
+          <aside className="md:w-1/3 main-bg p-4 h-fit">
             {/* 장르 */}
-            <section className="mb-6">
-              <h2 className="text-sm font-semibold text-slate-700 mb-2">🎵 장르</h2>
+            {/* <section className="mb-6">
+              <h2 className="text-sm font-semibold body-text mb-2">🎵 장르</h2>
               <div className="flex flex-wrap gap-2">
                 {allTypes.map(([t, count]) => (
                   <button
                     key={t}
                     className={`text-xs px-3 py-1 rounded-lg font-medium transition
-                      ${selectedType === t ? `${typeColors[t].selectedBg} ${typeColors[t].selectedText}` : `${typeColors[t].bg} ${typeColors[t].text}`}`}
+                    ${selectedType === t ? `${typeColors[t].selectedBg} ${typeColors[t].selectedText}` : `${typeColors[t].bg} ${typeColors[t].text}`}`}
                     onClick={() => setSelectedType(selectedType === t ? null : t)}
                   >
                     {t} <span className={`${selectedType === t ? `text-slate-200` : `text-slate-800`}`}>• {count}</span>
                   </button>
+                ))}
+              </div>
+            </section> */}
+            <section className="mb-6">
+              <h2 className="text-sm font-semibold body-text mb-2">🎵 장르</h2>
+              <div className="grid grid-cols-4 gap-x-4 gap-y-2 text-xs font-medium">
+                {allTypes.map(([t, count], index) => (
+                  <div key={t} className="flex items-center justify-center relative">
+                    <button
+                      className={`w-full px-2 py-1 text-center rounded-md transition
+                      ${selectedType === t 
+                        ? `${typeColors[t].selectedBg} ${typeColors[t].selectedText}` 
+                        : `${typeColors[t].bg} ${typeColors[t].text}`}`}
+                      onClick={() => setSelectedType(selectedType === t ? null : t)}
+                    >
+                      {t} <span className={`${selectedType === t ? 'text-slate-200' : 'text-slate-700'}`}>• {count}</span>
+                    </button>
+
+                    {/* | 구분선 (4번째마다 제외) */}
+                    {((index + 1) % 4 !== 0) && (
+                      <span className="absolute right-[-8px] text-slate-400">|</span>
+                    )}
+                  </div>
                 ))}
               </div>
             </section>
@@ -180,21 +221,22 @@ export default function SongListPage() {
               <div className="text-right mt-2">
                 <button
                   onClick={() => setShowArtistModal(true)}
-                  className="mt-2 w-full rounded-lg bg-white text-slate-600 font-medium py-2 hover:bg-slate-100 text-sm transition-all duration-200 hover:shadow-md"
+                  className="mt-2 w-full rounded-lg text-black font-medium py-1 text-sm transition-all duration-200 hover:shadow-md"
                 >
-                  전체보기 (+{allArtists.length-15})
+                  {/* 전체보기 (+{allArtists.length-15}) */}
+                  •  •  •
                 </button>
               </div>
             </section>
 
             {/* 태그 */}
-            <section>
+            {/* <section>
               <h2 className="text-sm font-semibold text-slate-700 mb-2">🏷️ 태그</h2>
               <div className="flex flex-wrap gap-2">
                 {allTags.map(([t, count]) => (
                   <button
                     key={t}
-                    className={`text-xs px-3 py-1 rounded-lg font-medium transition
+                    className={`text-xs px-3 py-1 font-medium transition
                       ${selectedTag === t ? `${tagColors[t].selectedBg} ${tagColors[t].selectedText}` : `${tagColors[t].bg} ${tagColors[t].text}`}`}
                     onClick={() => setSelectedTag(selectedTag === t ? null : t)}
                   >
@@ -203,14 +245,36 @@ export default function SongListPage() {
                 ))}
               </div>
             </section>
+ */}
+            <section className="mb-6">
+              <h2 className="text-sm font-semibold body-text mb-2">🏷️ 태그</h2>
+              <div className="grid grid-cols-4 gap-x-4 gap-y-2 text-xs font-medium">
+                {allTags.map(([t, count], index) => (
+                  <div key={t} className="flex items-center justify-center relative">
+                    <button
+                      className={`w-full px-2 py-1 text-center rounded-md transition
+                      ${selectedTag === t ? `main-select` : `bold`}`}
+                      onClick={() => setSelectedTag(selectedTag === t ? null : t)}
+                    >
+                      {t} <span className={`${selectedTag === t ? 'text-slate-200' : 'text-slate-700'}`}>• {count}</span>
+                    </button>
 
-            <p className="text-sm md:text-base text-gray-600 mt-6">노래책 내 곡 완곡 300개입니다.</p>
+                    {/* | 구분선 (4번째마다 제외) */}
+                    {((index + 1) % 4 !== 0) && (
+                      <span className="absolute right-[-8px] text-slate-400">|</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* <p className="text-sm md:text-base text-gray-600 mt-6">노래책 내 곡 완곡 300개입니다.</p> */}
           </aside>
 
           {/* RIGHT: search + list */}
-          <section className="flex-1 bg-white rounded-2xl shadow-sm p-4">
-            <div className="bg-white p-4 mb-4 flex flex-col md:flex-row justify-between items-center gap-3">
-              <div className="text-sm text-slate-600">
+          <section className="flex-1 main-bg shadow-sm p-4">
+            <div className="main-bg p-4 mb-4 flex flex-col md:flex-row justify-between items-center gap-3">
+              <div className="text-sm text-black">
                 총 <span className="font-semibold">{songs.length}</span>곡 중 <span className="font-semibold">{filtered.length}</span>곡
               </div>
 
@@ -235,10 +299,10 @@ export default function SongListPage() {
             <ul className="grid gap-3 max-h-[500px] overflow-y-auto">
               {filtered.length === 0 && <li className="text-center text-slate-500 py-8">검색 결과가 없습니다.</li>}
               {filtered.map((song) => (
-                <li key={song.id} className="flex-1 min-w-0 bg-white p-4 rounded-xl shadow-sm border border-slate-300 flex justify-between items-center">
+                <li key={song.id} className="flex-1 min-w-0 main-bg p-4 shadow-sm flex justify-between items-center">
                   <div className="flex-1 min-w-0">
                     <div className="font-semibold text-lg text-black truncate">{song.title}</div>
-                    <div className="text-sm text-slate-600">{song.artist}</div>
+                    <div className="text-sm text-slate-600">{song.artist.join(", ")}</div>
                   </div>
 
                   <div className="flex flex-wrap justify-end gap-2 ml-4 flex-shrink-0 max-w-[30%]">
